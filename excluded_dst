@@ -1,0 +1,9 @@
+# On liste ici les fichiers destination qu'on ne veut pas envoyer vers la sources
+# Les fichiers ne seront pas présent dans la liste des supprimés récemments
+
+
+/formation/CYcours/
+/formation/SFR_BUSINESS/
+/media/
+/music/Itunes/
+/sport/

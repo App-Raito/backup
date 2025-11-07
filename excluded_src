@@ -1,0 +1,6 @@
+# On liste ici les fichiers sources qu'on ne veut pas envoyer dans la destination
+
+/.*
+/downloads/
+/snap/
+

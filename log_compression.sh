@@ -1,0 +1,1 @@
+/var/log/backup/.log_compression.sh
