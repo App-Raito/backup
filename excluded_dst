@@ -1,9 +1,6 @@
-# On liste ici les fichiers destination qu'on ne veut pas envoyer vers la sources
-# Les fichiers ne seront pas présent dans la liste des supprimés récemments
+# Here we list files that we have in Hard Drive and we don't want on computer
+# These files won't be resore and won't be mentionned in recently deleted list
 
 
-/formation/CYcours/
-/formation/SFR_BUSINESS/
-/media/
-/music/Itunes/
-/sport/
+# /folder/
+# /folder/subfolder/

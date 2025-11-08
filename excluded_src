@@ -1,6 +1,7 @@
-# On liste ici les fichiers sources qu'on ne veut pas envoyer dans la destination
+# Here we list folders that we have on computer and we don't want on Hard Drive
 
-/.*
-/downloads/
-/snap/
+# Do not backup hidden files in the home directory
+# /.*
 
+# Do not backup ~/download folder
+# /downloads/

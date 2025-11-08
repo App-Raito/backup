@@ -16,18 +16,19 @@ function aff_man {
 }
 
 
-# SI $1 = excluded_dst, $2 = src = ordi, $3 = dst = DD
-    # Cette fonction affiche les fichiers présent sur le DD et absent sur l'ordi
-    # Ne mentionne pas les dossiers qu'on ne veut pas sur l'ordi : CYcours, media, etc..
-# SI $1 = excluded_src, $2 = src = DD, $3 = dst = ordi
-    # Cette fonction affiche les fichiers présent sur l'ordi et absent sur le DD
-    # Ne mentionne pas les dossiers qu'on ne veut pas sur le DD : /.*, snap, etc..
+# IF $1 = excluded_dst, $2 = src = computer, $3 = dst = hard drive
+    # This function displays the files present on the hard drive and absent on the computer.
+    # Do not mention the folders that you do not want on the computer
+# IF $1 = excluded_src, $2 = src = hard drive, $3 = dst = computer
+    # This function displays the files present on the computer and absent on the DD.
+    # Does not mention the folders that we do not want on the DD: /.*, snap, etc.
+
 function check_deleted {
 
     sudo rsync -arvhX --dry-run --delete --exclude-from=$1 $2 $3 > /tmp/delete_output 2>> $error_file
     error=$(($error + $?))
 
-    # On s'occupe des logs dans le deleted_file
+    # logs for "deleted file"
     echo -e "\n\n#### Deleted files in $dstdir \n" >> $deleted_file
     grep "deleting" /tmp/delete_output | cut -d ' ' -f 2- > /tmp/deleted_file 
     cat /tmp/deleted_file >> $deleted_file
@@ -38,12 +39,12 @@ function check_deleted {
 }
 
 
-# SI $1 = excluded_src, $2 = src = ordi, $3 = dst = DD
-    # Cette fonction copie les fichiers de l'ordi vers le DD
-    # Ne copie pas les éléments qu'on ne veut pas sur le DD : /.*, snap, etc..
-# SI $1 = excluded_dst, $2 = src = DD, $3 = dst = ordi
-    # Cette fonciton copie les fichiers du dd vers l'ordi
-    # Ne copie pas les dossiers qu'on ne veut pas sur l'ordi : CYcours, media, etc..
+# IF $1 = excluded_src, $2 = src = computer, $3 = dst = HD
+    # This function copies files from the computer to the HD.
+    # Does not copy unwanted items to the HD: /.*, snap, etc.
+# IF $1 = excluded_dst, $2 = src = HD, $3 = dst = computer
+    # This function copies files from the DD to the computer.
+    # Do not copy folders that you do not want on the computer
 function execute_sync {
 
     if [ $log_only -eq 1 ]
@@ -57,18 +58,18 @@ function execute_sync {
 
 }
 
-# Cette fonciton déplace les fichiers dans une poubelle custom au lieu de les supprimer
+# Move file to a specific locations instead of removing them
 function delete_file {
 
-    #récupérer le chemin du fichier
+    #get file path
     path=$(echo $line_content | awk -F/ '{OFS="/"; $NF=""; print $0}')
-    #créer l'arborescence dans rsync_trash si elle existe pas 
+    #create trash path if not exist
     if [ ! -d "$trash_dir$path" ]
     then
        sudo mkdir -p "$trash_dir$path" >> $log_file 2>> $error_file
     fi
-    # déplacer le $dst_dir$line content dans $trash_dir$line content 
-    #Si c'est un dossier on a pas besoin de le déplacer, on l'a déja créé juste au dessus, il faut juste le supprimer dans la dst
+    # move $dst_dir$line_content to $trash_dir$line_content 
+    #If it's a folder, no need to move it, we have already created it
     if [ ! -d "$dst_dir$line_content" ]
     then
         sudo mv "$dst_dir$line_content" "$trash_dir$line_content" >> $log_file 2>> $error_file
@@ -78,7 +79,7 @@ function delete_file {
 }
 
 
-# Cette fonction calcule le temps qu'a pris le programme pour s'executer
+# calculate execution time
 function execution_time {
 
     end_time=$(date +%s)
@@ -90,21 +91,21 @@ function execution_time {
     echo "$mm m $ss s"
 }
 
-################################ PARAMETRES ################################
+################################ PARAMETERS ################################
 
-# Paramètres par défaut		
+# Default parameters
 start_time=$(date +%s)
-i=1             # Par défaut on fait un backup sur le disk1
-backup=1        # Par défaut, on fait un backup
+i=1             # By default, we backup on disk 1
+backup=1        # By default, we do the backup (and not the restore)
 restore=0
-verbose=0       # Par défaut, le mode verbose est off
-log_only=0		# Par défaut, le mode log only est off
+verbose=0       # By default, verbose mode is off
+log_only=0		# By default, log only mode is off
 error=0
-delete=1        # Par défaut, on ne supprime automatiquement les fichiers dans la destination
-nosystem=0      # Par défaut, on fait un backup du système
+delete=1        # By default, we delete files in destination without asking confirmation
+nosystem=0      # By default, we backup the system
 
 
-# $# retrourne le nombre d'argument spécifié par l'utilisateur 
+# $# return the number of parameters provided by user
 while [[ $# -gt 0 ]]
 do
     key="$1"
@@ -158,14 +159,17 @@ done
 
 ################################ VARIABLES ################################
 
-# Variable des fichiers
+# file variable
 host=$(hostname)
-src_dir="/home/raito/"
-dst_dir="/media/raito/prDisk$i""_main/bunker/"
-trash_dir="/media/raito/prDisk$i""_main/.rsync_trash/$(date -u +%Y-%m-%d)_$host/"
+user=$(whoami)
+src_dir="/home/$user/"
+dst_dir="/media/$user/Disk$i""/folder/"
 
-excluded_src="/home/raito/pgm/sh/backup/excluded_src"
-excluded_dst="/home/raito/pgm/sh/backup/excluded_dst"
+# WARNING : trash musn't be inside dst_dir
+trash_dir="/media/$user/Disk$i""/.rsync_trash/$(date -u +%Y-%m-%d)_$host/"
+
+excluded_src="/home/$user/backup/excluded_src"
+excluded_dst="/home/$user/backup/excluded_dst"
 
 log_file="/var/log/backup/$(date -u +%Y-%m-%d)_$host""_dd$i""_sync.log"
 error_file="/var/log/backup/$(date -u +%Y-%m-%d)_$host""_dd$i""_error.log"
@@ -174,7 +178,7 @@ deleted_file="/var/log/backup/$(date -u +%Y-%m-%d)_$host""_dd$i""_deleted.log"
 
 ################################ MAIN ################################
 
-# Si on est en mode restore, la source devient la dest et la dest devient la source
+# In restore mode, we exchange source directory and destination directory
 if [ $restore -eq 1 ]
 then
     temp=$src_dir
@@ -185,7 +189,7 @@ fi
 if [ $backup -eq 1 ] || [ $restore -eq 1 ]
 then
 
-    #notif de début de script
+    # Script start notification
     if [ $backup -eq 1 ]
     then
         zenity --notification --text="$(date "+%A %d %b \t %T") \n Backup Starting...\n$src_dir on $dst_dir"
@@ -193,12 +197,12 @@ then
         zenity --notification --text="$(date "+%A %d %b \t %T") \n Restore Starting...\n$src_dir on $dst_dir"
     fi
 
-    #fichier de log
+    #log file
     touch $log_file
     touch $error_file
     touch $deleted_file
 
-    #notif pendant le script
+    #Script running notification
     if [ $backup -eq 1 ]
     then
         tail -f $log_file | zenity --text-info --width=600 --height=400 --title="Disk$i - Backup running" --auto-scroll  &
@@ -206,7 +210,7 @@ then
         tail -f $log_file | zenity --text-info --width=600 --height=400 --title="Restore running" --auto-scroll  &
     fi
     
-    #Génération de logs
+    #log generation
     echo -e " \n\n\n\n### Starting sync on $host from $src_dir to $dst_dir" >> $log_file
 
     if [ $log_only -eq 1 ]; then
@@ -217,10 +221,18 @@ then
     echo -e "\n##### SYNC HOME\n" >> $log_file
 
 
-    #On vérifie si les dossiers existent
-    if [ ! -d $src_dir ] || [ ! -d $dst_dir ]
+    #Check if files exist
+    if [ ! -d $src_dir ]
     then
-        echo -e "\nCannot find the source : $src_dir or the destination : $dst_dir\n" >> $log_file
+        echo -e "\nCannot find the source : $src_dir\n" >> $log_file
+        exit 1
+    elif [ ! -d $dst_dir ]
+    then
+        echo -e "\nCannot find the destination : $dst_dir\n" >> $log_file
+        exit 1
+    elif [ ! -d $trash_dir ]
+    then
+        echo -e "\nCannot find the trash : $trash_dir\n" >> $log_file
         exit 1
     else 
         if [ $backup -eq 1 ]
@@ -235,7 +247,7 @@ then
         fi
     fi
 
-    # supression des fichiers superflus dans la destination
+    # Removing files in destination
     if [ $log_only -eq 0 ]
     then
         nb_line=$(wc -l /tmp/deleted_file | cut -d ' ' -f 1)
@@ -265,20 +277,18 @@ then
     if [ $backup -eq 1 ] && [ $log_only -eq 0 ] && [ $nosystem -eq 0 ]
     then
         echo -e "\n##### SYNC SYSTEM\n" >> $log_file
-        # On définit la configuraiton timeshift du disk1 comme configuraiton à utiliser
-        #si on backup sur disk1
+        # The timeshift configuration of disk(1 or 2) is defined as the configuration to be used.
         sudo cp /etc/timeshift/timeshift_disk$i.json /etc/timeshift/timeshift.json
         sleep 0.1
-        # avec timeshift --check on lance le backup uniquement si le dernier backup est daté d'une semaine
-        # --scripted permet d'utiliser timeshift sans intéraction utilisateur
+        # with timeshift --check we do the backup only if previous snapchot is old enough
         sudo timeshift --check --verbose --scripted >> $log_file 2>&1
         error=$(($error + $?))
         sudo timeshift --list >> $log_file 2>&1
-        # On empeche les executions de /etc/crond.d/timeshift-hourly
+        # To prevent executions of /etc/crond.d/timeshift-hourly
         sudo cp /etc/timeshift/default.json /etc/timeshift/timeshift.json
     fi
 
-    # On vérifie s'il y a eu des erreurs dans le script
+    # We check if errors
     if [ $error != 0 ]
     then 
         echo -e "\n#-- $(date "+%d %b %Y %T") \t Synchronisation Failed \t (time : $(execution_time))\n" >> $log_file
@@ -286,16 +296,16 @@ then
         echo -e "\n#-- $(date "+%d %b %Y %T") \t Synchronisation Succeeded \t (time : $(execution_time))\n" >> $log_file
     fi
 
-    # Si on effectue un vrai backup et qu'il n'y a pas eu d'erreur
+    # If we did a real backup and there was no errors
     if [ $backup -eq 1 ] && [ $log_only -eq 0 ] && [ $error -eq 0 ]
     then
-        # on enregistre la date actuelle dans un fichier (pour le daemon)
+        # We save current date in pesistent file (for daemon)
         echo "$(date +%s)" > /var/tmp/last_backup_on_disk$i
-        # on ajoute une ligne pour dire que le backup est fait 
-        echo -e "$(date -u +%Y-%m-%d) - $(date +%T)\t rsync.sh done on disk$i" >> /var/log/backup/rsync_daemon.log
+        # Add line in daemon logs
+        echo -e "$(date -u +%Y-%m-%d) - $(date +%T)\t backup.sh done on disk$i" >> /var/log/backup/backup_daemon.log
     fi
 
-    # On supprime les fichiers qui ont été créés et qui sont vides
+    # We remove empty files
     if [ $(wc -l $error_file | cut -d ' ' -f 1) = 0 ]; then    
         rm $error_file
     fi
@@ -303,14 +313,14 @@ then
         rm $deleted_file
     fi
 
-    # On supprime la progression de timeshift dans sync_file
+    # Unnecessary timeshift log lines are removed.
     if [ $nosystem -eq 0 ]
     then
         grep -v "% complete (" $log_file > /var/log/backup/temp.log
         mv "/var/log/backup/temp.log" "$log_file"
     fi
 
-    #notif de fin de script
+    #Script end notification
     if [ $error -eq 0 ]      
     then 
         zenity --notification --text="$(date "+%A %d %b \t %T") \n Synchronisation - Succeed" 
