@@ -94,7 +94,7 @@ WantedBy=multi-user.target
 
 - file  **/usr/sbin/backupd**
 
-	ln -s $HOME/backup/backupd.sh /usr/sbin/backupd
+		ln -s $HOME/backup/backupd.sh /usr/sbin/backupd
 
 - After adding or modifying a daemon
 
@@ -108,11 +108,14 @@ WantedBy=multi-user.target
 
 1. Open the timeshift graphical interface and run the wizard for disk 1
 2. Copy and rename the configuration file in `/etc/timeshift/`
+   
         sudo cp /etc/timeshift/timeshift.json /etc/timeshift/timeshift_disk1.json
-3. Do the same for disk 2
-4. Create an empty configuration file and name it `/etc/timeshift/default.json`
+   
+4. Do the same for disk 2
+5. Create an empty configuration file and name it `/etc/timeshift/default.json`
 
 The folder must contain these files: 
+
 <img width="650" height="92" alt="image" src="https://github.com/user-attachments/assets/425befb0-005d-45de-9f18-473bd3157b83" />
 
 
