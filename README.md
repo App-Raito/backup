@@ -162,5 +162,7 @@ Remember to modify the file variables in the backup.sh script (line 160)
         cd /var/log/backup/
 
 **sync. log**: lists the files transferred to remote storage
+
 **deleted.log**: lists the files recently deleted from local storage (present in the destination and absent from the source)
+
 **error.log**: displays errors during script execution
