@@ -111,8 +111,8 @@ WantedBy=multi-user.target
    
         sudo cp /etc/timeshift/timeshift.json /etc/timeshift/timeshift_disk1.json
    
-4. Do the same for disk 2
-5. Create an empty configuration file and name it `/etc/timeshift/default.json`
+3. Do the same for disk 2
+4. Create an empty configuration file and name it `/etc/timeshift/default.json`
 
 The folder must contain these files: 
 
