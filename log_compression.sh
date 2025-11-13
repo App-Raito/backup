@@ -1,41 +1,44 @@
 #!/bin/bash
 
-#Le script est appelé tous les 7 jours, après 30mn de uptime, avec une règle présente dans /etc/anacrontab
+
+# This script is used to group and compress the logs produced by backup.sh. 
+
+#This script is launched every 7 days , after a 30mn uptime. Put the following rule in  /etc/anacrontab
 #7       30      tar_backup_log  /var/log/backup/.log_compression.sh >> /var/log/backup/anacron.log 2>&1
 
 
 
 function createArchive {
-    # filename = 2025-02-19_latitude5510_dd1_deleted.log
+    # filename = 2025-02-19_hostanme_dd1_deleted.log
     fileName=$1
-    # archiveName = 2025-02-19_latitude5510
+    # archiveName = 2025-02-19_hostname
     archiveName="$(echo "$fileName" | cut -d '_' -f 1-2).tar"
-    # On ajoute le fichier à l'archive (si l'archive n'existe pas elle est créée)
+    # We add file to archive, (if archive do not exists it will be created)
     tar -rf "$archiveName" "$fileName"
     echo $?
 }
 
 echo -e "\n$(date -u +%Y-%m-%d) - $(date +%T)\t Anacron - log_compression.sh started"
 
-#Par défaut anacron est dans /
+#By default anacron is in  /
 cd /var/log/backup
 
 for file in *.log
 do 
-    # Vérifiez si le fichier existe
+    # check if file exists
     if [[ -e "$file" ]]; then
         creation_date=$(stat -c %W "$file")
 
-        # Ignorez les fichiers qui ne sont pas des archives
-        if [ "$file" == "rsync_daemon.log" ] || [ "$file" == "anacron.log" ]; then
+        # Ignore files that are not archives
+        if [ "$file" == "backup_daemon.log" ] || [ "$file" == "anacron.log" ]; then
             continue
         fi
 
         if [[ $creation_date -gt 0 ]]; then
-            # Calculez la date actuelle moins 1 mois
+            # Calculate date one month ago
             limit_date=$(date -d "1 months ago" +%s)
 
-            # Si fichier a une date de création > à 1 mois, on le transforme en archive
+            # If file has a creation date > 1 month, we change it in archive
             if [[ $creation_date -lt $limit_date ]]; then
                 error=$(createArchive "$file")
 
