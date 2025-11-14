@@ -230,10 +230,6 @@ then
     then
         echo -e "\nCannot find the destination : $dst_dir\n" >> $log_file
         exit 1
-    elif [ ! -d $trash_dir ]
-    then
-        echo -e "\nCannot find the trash : $trash_dir\n" >> $log_file
-        exit 1
     else 
         if [ $backup -eq 1 ]
         then
